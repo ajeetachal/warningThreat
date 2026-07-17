@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cybersecurity Awareness Simulation</title>
+
+<!--
+  ============================================================================
+  CYBERSECURITY AWARENESS SIMULATION — for trainer-led workshops
+  ============================================================================
+  This is a SAFE, offline, client-side-only demonstration. It does not:
+    - collect, transmit or store any personal data
+    - access camera, microphone, location or clipboard
+    - make any network request beyond loading this page
+    - use cookies, localStorage, or any tracking/analytics
+
+  FILES:
+    index.html  - structure (this file)
+    style.css   - visual design & animations
+    script.js   - simulation logic & trainer controls
+
+  QUICK CUSTOMIZATION GUIDE (trainer):
+    - Warning headline / body text  -> edit the text inside #sim-screen below
+    - Terminal "hacking" lines      -> edit TERMINAL_LINES array in script.js
+    - Countdown duration            -> edit DEFAULT_COUNTDOWN in script.js
+                                       (or use the on-screen Trainer Controls)
+    - Reveal / learning-point text  -> edit the text inside #reveal-screen below
+    - Colors                        -> edit CSS custom properties in style.css (:root)
+    - Sound on/off                  -> Trainer Controls panel, or SOUND_ENABLED_DEFAULT in script.js
+  ============================================================================
+-->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Screen-reader announcement region (polite, non-intrusive) -->
+<div id="sr-announcer" class="sr-only" aria-live="polite"></div>
+
+<!-- =====================================================================
+     PHASE 1 — FAKE WARNING SIMULATION
+     Everything here is 100% cosmetic. No real scan, no real data use.
+     ===================================================================== -->
+<main id="sim-screen" class="screen sim-screen" aria-label="Simulated warning screen (training exercise)">
+
+  <div class="flash-border" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <div class="sim-content">
+
+    <div class="warning-icon-wrap" aria-hidden="true">
+      <svg class="warning-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2 L23 21 H1 Z" fill="currentColor"/>
+        <rect x="11" y="8.5" width="2" height="6" rx="1" fill="#0a0a0f"/>
+        <rect x="11" y="16" width="2" height="2" rx="1" fill="#0a0a0f"/>
+      </svg>
+    </div>
+
+    <p class="eyebrow">⚠ SECURITY ALERT ⚠</p>
+    <h1 class="glitch-headline" data-text="YOUR PHONE HAS BEEN HACKED!">YOUR PHONE HAS BEEN HACKED!</h1>
+
+    <div class="progress-stack" id="progress-stack" aria-hidden="true">
+      <!-- Fake progress bars injected by script.js -->
+    </div>
+
+    <div class="terminal" role="status" aria-label="Simulated system log (not a real scan)">
+      <div class="terminal-header">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <span class="terminal-title">system_log.exe</span>
+      </div>
+      <div id="terminal-body" class="terminal-body"></div>
+    </div>
+
+    <p class="do-not-close">🚫 DO NOT CLOSE THIS PAGE</p>
+
+    <div class="countdown-wrap">
+      <span class="countdown-label">Resolving in</span>
+      <span id="countdown-num" class="countdown-num">15</span>
+      <span class="countdown-label">seconds</span>
+    </div>
+
+    <p class="sim-footnote">This is a training simulation. No real scan is taking place.</p>
+  </div>
+
+  <!-- Always-visible accessible controls (never hidden, per accessibility requirements) -->
+  <div class="sim-actions">
+    <button id="mute-btn" type="button" class="pill-btn" aria-pressed="false">🔊 Mute Sound</button>
+    <button id="end-sim-btn" type="button" class="pill-btn pill-btn-primary">✕ End Simulation</button>
+  </div>
+
+</main>
+
+<!-- =====================================================================
+     PHASE 2 — REVEAL & AWARENESS CONTENT
+     ===================================================================== -->
+<main id="reveal-screen" class="screen reveal-screen" hidden aria-label="Cybersecurity awareness debrief">
+  <div class="reveal-content">
+
+    <div class="reveal-badge" aria-hidden="true">🎉</div>
+    <h1 class="reveal-title">Congratulations!</h1>
+    <p class="reveal-subtitle">This was only a cybersecurity awareness simulation. Your phone was never at risk — nothing was scanned, encrypted, or sent anywhere.</p>
+
+    <section class="feel-section" aria-labelledby="feel-heading">
+      <h2 id="feel-heading">What you just felt</h2>
+      <p>You experienced exactly what scammers want a victim to feel:</p>
+      <div class="feel-chips">
+        <span class="chip">😨 Panic</span>
+        <span class="chip">😰 Fear</span>
+        <span class="chip">⏱ Urgency</span>
+      </div>
+      <p>Real attackers use these emotions to pressure people into clicking fake links or calling fake "support" numbers — before the victim has time to think clearly.</p>
+    </section>
+
+    <section class="lessons-section" aria-labelledby="lessons-heading">
+      <h2 id="lessons-heading">How to protect yourself</h2>
+      <ul class="lessons-list">
+        <li><span class="check" aria-hidden="true">✓</span> Never panic.</li>
+        <li><span class="check" aria-hidden="true">✓</span> Never trust pop-ups claiming your device is hacked.</li>
+        <li><span class="check" aria-hidden="true">✓</span> Never call numbers shown in suspicious pop-ups.</li>
+        <li><span class="check" aria-hidden="true">✓</span> Never install software from unknown websites.</li>
+        <li><span class="check" aria-hidden="true">✓</span> Always verify website URLs before entering passwords.</li>
+        <li><span class="check" aria-hidden="true">✓</span> When in doubt, close the browser and consult a trusted person or IT support.</li>
+      </ul>
+    </section>
+
+    <button id="restart-btn" type="button" class="pill-btn pill-btn-primary reveal-restart">↻ Run Simulation Again</button>
+  </div>
+</main>
+
+<!-- =====================================================================
+     TRAINER CONTROLS — floating, hidden behind a small toggle icon
+     ===================================================================== -->
+<button id="trainer-toggle" type="button" class="trainer-toggle" aria-expanded="false" aria-controls="trainer-panel" title="Trainer Controls">⚙</button>
+
+<aside id="trainer-panel" class="trainer-panel" hidden aria-label="Trainer controls">
+  <div class="trainer-panel-header">
+    <h2>Trainer Controls</h2>
+    <button id="trainer-close" type="button" class="icon-btn" aria-label="Close trainer controls">✕</button>
+  </div>
+
+  <div class="trainer-row">
+    <button id="tc-restart" type="button" class="tc-btn">↻ Restart Simulation</button>
+  </div>
+  <div class="trainer-row">
+    <button id="tc-skip" type="button" class="tc-btn">⏭ Skip to Reveal</button>
+  </div>
+  <div class="trainer-row">
+    <button id="tc-sound" type="button" class="tc-btn" aria-pressed="true">🔊 Sound: On</button>
+  </div>
+  <div class="trainer-row">
+    <button id="tc-fullscreen" type="button" class="tc-btn">⛶ Toggle Full-Screen</button>
+  </div>
+  <div class="trainer-row trainer-slider-row">
+    <label for="tc-duration">Countdown duration: <span id="tc-duration-val">15</span>s</label>
+    <input id="tc-duration" type="range" min="5" max="20" step="1" value="15">
+  </div>
+  <p class="trainer-note">Duration change applies on next restart. No data is saved — settings reset when the page reloads.</p>
+</aside>
+
+<script src="script.js"></script>
+</body>
+</html>
