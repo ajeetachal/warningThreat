@@ -1,0 +1,542 @@
+/* ============================================================================
+   CYBERSECURITY AWARENESS SIMULATION — STYLES
+   ----------------------------------------------------------------------------
+   CUSTOMIZATION:
+   - All colors live in the :root custom properties below. Change the hex
+     values there to reskin either phase without touching the rest of the file.
+   - Photosensitivity note: the border "flash" is a slow ~1.1s pulse (well
+     under the 3-flashes-per-second threshold), not a strobe. Please do not
+     speed it up beyond ~1 cycle/second.
+   ============================================================================ */
+
+:root {
+  /* --- Phase 1: simulation theme (dark + red) --- */
+  --sim-bg-0: #0a0a0f;
+  --sim-bg-1: #150808;
+  --sim-red: #ff2740;
+  --sim-red-bright: #ff5c72;
+  --sim-red-dim: #7a1120;
+  --sim-text: #f5e9ea;
+  --sim-amber: #ffb020;
+  --sim-green-term: #35e08a;
+
+  /* --- Phase 2: reveal / educational theme (blue + green) --- */
+  --rev-bg-0: #0b2036;
+  --rev-bg-1: #0e2f45;
+  --rev-accent: #22c99e;
+  --rev-accent-2: #4fb0ff;
+  --rev-text: #eaf6f6;
+  --rev-card: #123249;
+
+  /* --- Shared --- */
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --font-display: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+button { font-family: inherit; cursor: pointer; }
+ul { list-style: none; margin: 0; padding: 0; }
+
+.screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* ============================================================
+   PHASE 1 — SIMULATION SCREEN
+   ============================================================ */
+
+.sim-screen {
+  background:
+    radial-gradient(120% 90% at 50% -10%, var(--sim-bg-1) 0%, var(--sim-bg-0) 60%);
+  color: var(--sim-text);
+  padding: clamp(16px, 5vw, 40px) 16px 110px;
+  overflow: hidden;
+  animation: bg-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes bg-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.06); }
+}
+
+/* Slow, gentle border pulse — NOT a rapid strobe (photosensitivity-safe) */
+.flash-border {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  box-shadow: inset 0 0 0 6px var(--sim-red);
+  animation: border-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes border-pulse {
+  0%, 100% { box-shadow: inset 0 0 0 3px rgba(255,39,64,0.35); }
+  50% { box-shadow: inset 0 0 0 8px rgba(255,39,64,0.85); }
+}
+
+.scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0.06;
+  background: repeating-linear-gradient(
+    to bottom,
+    #fff 0px, #fff 1px,
+    transparent 2px, transparent 4px
+  );
+}
+
+.sim-content {
+  position: relative;
+  z-index: 6;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+/* Shake is applied as a class toggled briefly by JS, not a constant animation,
+   so it reads as a "glitch event" rather than continuous motion. */
+.shake-once {
+  animation: shake 0.42s cubic-bezier(.36,.07,.19,.97);
+}
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.warning-icon-wrap {
+  color: var(--sim-red);
+  width: clamp(64px, 20vw, 96px);
+  filter: drop-shadow(0 0 14px rgba(255,39,64,0.55));
+  animation: icon-throb 1.4s ease-in-out infinite;
+}
+@keyframes icon-throb {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.warning-icon { width: 100%; height: 100%; display: block; }
+
+.eyebrow {
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: var(--sim-red-bright);
+  margin: 0;
+  font-size: clamp(0.8rem, 3vw, 0.95rem);
+}
+
+.glitch-headline {
+  position: relative;
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 0 18px rgba(255,39,64,0.5);
+}
+
+/* Glitch layers use ::before/::after with clipped offsets — a brief,
+   intermittent effect triggered by JS via the .glitch-active class,
+   kept short so it never becomes a continuous rapid flicker. */
+.glitch-headline::before,
+.glitch-headline::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0; top: 0; width: 100%;
+  opacity: 0;
+}
+.glitch-active.glitch-headline::before {
+  color: var(--rev-accent-2, #4fb0ff);
+  clip-path: polygon(0 10%, 100% 10%, 100% 30%, 0 30%);
+  transform: translate(-2px, -1px);
+  opacity: 0.8;
+  animation: glitch-flicker 0.32s steps(2, end) 1;
+}
+.glitch-active.glitch-headline::after {
+  color: var(--sim-red);
+  clip-path: polygon(0 60%, 100% 60%, 100% 82%, 0 82%);
+  transform: translate(2px, 1px);
+  opacity: 0.8;
+  animation: glitch-flicker 0.32s steps(2, end) 1;
+}
+@keyframes glitch-flicker {
+  0% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+.progress-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.progress-item {
+  width: 100%;
+  text-align: left;
+}
+.progress-item .label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--sim-amber);
+  margin-bottom: 3px;
+}
+.progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--sim-red-dim), var(--sim-red));
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+.terminal {
+  width: 100%;
+  margin-top: 6px;
+  background: #0d0d10;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-align: left;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #17171b;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.terminal-header .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+.terminal-title {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #8a8a92;
+}
+.terminal-body {
+  padding: 12px;
+  min-height: 108px;
+  max-height: 140px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--sim-green-term);
+}
+.terminal-line { opacity: 0; animation: line-in 0.25s ease forwards; }
+@keyframes line-in { to { opacity: 1; } }
+.terminal-line .caret {
+  display: inline-block;
+  width: 7px;
+  height: 12px;
+  background: var(--sim-green-term);
+  margin-left: 2px;
+  animation: caret-blink 1s step-end infinite;
+  vertical-align: middle;
+}
+@keyframes caret-blink { 50% { opacity: 0; } }
+
+.do-not-close {
+  font-weight: 700;
+  color: var(--sim-red-bright);
+  font-size: clamp(0.85rem, 3.4vw, 1rem);
+  margin: 2px 0 0;
+}
+
+.countdown-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-mono);
+  color: var(--sim-text);
+  font-size: 0.9rem;
+}
+.countdown-num {
+  font-size: clamp(1.6rem, 6vw, 2rem);
+  font-weight: 800;
+  color: var(--sim-red-bright);
+  min-width: 1.4ch;
+  text-align: center;
+}
+
+.sim-footnote {
+  font-size: 0.72rem;
+  color: rgba(245,233,234,0.55);
+  margin-top: 4px;
+}
+
+.sim-actions {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(10,10,15,0.95), rgba(10,10,15,0));
+}
+
+.pill-btn {
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+.pill-btn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.pill-btn-primary {
+  background: var(--sim-red);
+  border-color: var(--sim-red);
+}
+
+/* ============================================================
+   PHASE 2 — REVEAL SCREEN
+   ============================================================ */
+
+.reveal-screen {
+  background: radial-gradient(120% 90% at 50% -10%, var(--rev-bg-1) 0%, var(--rev-bg-0) 65%);
+  color: var(--rev-text);
+  padding: clamp(24px, 6vw, 48px) 16px 60px;
+  opacity: 0;
+  animation: fade-up 0.7s ease forwards;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal-content {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+
+.reveal-badge {
+  font-size: clamp(2.4rem, 10vw, 3.2rem);
+  filter: drop-shadow(0 4px 12px rgba(34,201,158,0.4));
+}
+.reveal-title {
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(90deg, var(--rev-accent-2), var(--rev-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.reveal-subtitle {
+  max-width: 46ch;
+  font-size: clamp(0.95rem, 3.2vw, 1.05rem);
+  line-height: 1.6;
+  color: rgba(234,246,246,0.88);
+  margin: 0;
+}
+
+.feel-section, .lessons-section {
+  width: 100%;
+  background: var(--rev-card);
+  border: 1px solid rgba(79,176,255,0.18);
+  border-radius: var(--radius-lg);
+  padding: clamp(18px, 4vw, 26px);
+  text-align: left;
+}
+.feel-section h2, .lessons-section h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  color: var(--rev-accent-2);
+}
+.feel-section p { margin: 6px 0; line-height: 1.6; color: rgba(234,246,246,0.9); }
+
+.feel-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.chip {
+  background: rgba(79,176,255,0.14);
+  border: 1px solid rgba(79,176,255,0.3);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lessons-list { display: flex; flex-direction: column; gap: 10px; }
+.lessons-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+  font-size: 0.98rem;
+}
+.check {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--rev-accent);
+  color: #06231b;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.reveal-restart {
+  margin-top: 6px;
+  background: linear-gradient(90deg, var(--rev-accent-2), var(--rev-accent));
+  border: none;
+  color: #06231b;
+  padding: 12px 22px;
+}
+
+/* ============================================================
+   TRAINER CONTROLS
+   ============================================================ */
+
+.trainer-toggle {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 50;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(20,20,26,0.75);
+  color: #fff;
+  font-size: 1.1rem;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+}
+.trainer-toggle:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.trainer-panel {
+  position: fixed;
+  bottom: 68px;
+  right: 16px;
+  z-index: 50;
+  width: min(300px, calc(100vw - 32px));
+  background: #14141a;
+  color: #f2f2f4;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+}
+.trainer-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.trainer-panel-header h2 { font-size: 0.95rem; margin: 0; }
+.icon-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1rem;
+  padding: 4px;
+}
+.trainer-row { margin: 8px 0; }
+.tc-btn {
+  width: 100%;
+  text-align: left;
+  background: #1f1f28;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #f2f2f4;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.tc-btn:focus-visible, .pill-btn:focus-visible, .icon-btn:focus-visible { outline: 3px solid #4fb0ff; outline-offset: 2px; }
+.trainer-slider-row label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+  color: #cfcfd6;
+}
+.trainer-slider-row input[type="range"] { width: 100%; }
+.trainer-note {
+  font-size: 0.68rem;
+  color: #8a8a92;
+  margin: 10px 0 0;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   REDUCED MOTION — respect user/OS preference
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .sim-screen, .flash-border, .warning-icon-wrap,
+  .glitch-headline::before, .glitch-headline::after,
+  .shake-once, .reveal-screen {
+    animation: none !important;
+  }
+  .flash-border { box-shadow: inset 0 0 0 4px rgba(255,39,64,0.55); }
+}
+
+/* Small screens: tighten spacing */
+@media (max-width: 360px) {
+  .sim-content { gap: 10px; }
+  .terminal-body { min-height: 90px; }
+}
